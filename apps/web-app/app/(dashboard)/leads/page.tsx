@@ -104,7 +104,7 @@ export default function LeadsPage() {
                 placeholder="Search by name, email, or phone..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
               <svg
                 className="absolute left-3 top-3 h-5 w-5 text-gray-400"
@@ -127,7 +127,7 @@ export default function LeadsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             >
               <option value="">All Statuses</option>
               <option value="NEW">New</option>
@@ -142,7 +142,7 @@ export default function LeadsPage() {
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             >
               <option value="">All Sources</option>
               <option value="WEBSITE">Website</option>
@@ -282,7 +282,12 @@ export default function LeadsPage() {
                     >
                       View
                     </button>
-                    <button className="text-gray-600 hover:text-gray-900">Edit</button>
+                    <button
+                      onClick={() => router.push(`/leads/${lead.id}`)}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -393,7 +398,7 @@ function CreateLeadModal({
                 required
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
 
@@ -406,7 +411,7 @@ function CreateLeadModal({
                 required
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
             </div>
           </div>
@@ -418,7 +423,7 @@ function CreateLeadModal({
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
           </div>
 
@@ -428,7 +433,7 @@ function CreateLeadModal({
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
           </div>
 
@@ -437,7 +442,7 @@ function CreateLeadModal({
             <select
               value={formData.source}
               onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             >
               <option>Website</option>
               <option>Referral</option>
@@ -454,7 +459,7 @@ function CreateLeadModal({
               rows={3}
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
           </div>
 

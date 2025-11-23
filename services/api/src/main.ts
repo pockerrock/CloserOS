@@ -10,7 +10,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+  }));
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
     credentials: true,
