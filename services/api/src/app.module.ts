@@ -22,6 +22,7 @@ import { AiModule } from './common/ai/ai.module';
 import { NotificationsModule } from './common/notifications/notifications.module';
 import { WebSocketsModule } from './common/websockets/websockets.module';
 import { ActivityModule } from './common/activity/activity.module';
+import { CalendarModule } from './common/calendar/calendar.module';
 import { JobsModule } from './jobs/jobs.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -54,6 +55,7 @@ import { AppService } from './app.service';
     NotificationsModule,
     WebSocketsModule,
     ActivityModule,
+    CalendarModule,
     JobsModule,
     AuthModule,
     UsersModule,

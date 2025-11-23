@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { StripeService } from '../common/stripe/stripe.service';
+import { ActivityService } from '../common/activity/activity.service';
 import { DealStage } from '@prisma/client';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class DealsService {
     private prisma: PrismaService,
     private stripeService: StripeService,
     private configService: ConfigService,
+    private activityService: ActivityService,
   ) {}
 
   async create(data: {
@@ -50,11 +52,36 @@ export class DealsService {
     });
   }
 
-  async updateStage(id: string, stage: DealStage) {
-    return this.prisma.deal.update({
+  async updateStage(id: string, stage: DealStage, userId?: string) {
+    // Get deal before update to log activity
+    const dealBefore = await this.prisma.deal.findUnique({
+      where: { id },
+      include: { lead: true },
+    });
+
+    if (!dealBefore) {
+      throw new Error('Deal not found');
+    }
+
+    const deal = await this.prisma.deal.update({
       where: { id },
       data: { stage },
+      include: { lead: true, closer: true },
     });
+
+    // Log activity
+    if (userId) {
+      await this.activityService.logDealStageChanged(
+        deal.workspaceId,
+        userId,
+        deal.id,
+        `${deal.lead.firstName} ${deal.lead.lastName}`,
+        dealBefore.stage,
+        stage,
+      );
+    }
+
+    return deal;
   }
 
   async markPaid(id: string, stripePaymentId: string) {

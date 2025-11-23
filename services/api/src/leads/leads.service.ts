@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { ActivityService } from '../common/activity/activity.service';
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private activityService: ActivityService,
+  ) {}
 
   async create(data: {
     workspaceId: string;
@@ -17,13 +21,23 @@ export class LeadsService {
     assignedToId?: string;
     notes?: string;
   }) {
-    return this.prisma.lead.create({
+    const lead = await this.prisma.lead.create({
       data,
       include: {
         createdBy: true,
         assignedTo: true,
       },
     });
+
+    // Log activity
+    await this.activityService.logLeadCreated(
+      data.workspaceId,
+      data.createdById,
+      lead.id,
+      `${lead.firstName} ${lead.lastName}`,
+    );
+
+    return lead;
   }
 
   async findByWorkspace(workspaceId: string) {
@@ -107,10 +121,34 @@ export class LeadsService {
   }
 
   async bulkAssign(leadIds: string[], assignedToId: string) {
+    // Get leads before update to log activity
+    const leads = await this.prisma.lead.findMany({
+      where: { id: { in: leadIds } },
+      include: { assignedTo: true },
+    });
+
     const result = await this.prisma.lead.updateMany({
       where: { id: { in: leadIds } },
       data: { assignedToId },
     });
+
+    // Get assigned user info
+    const assignedTo = await this.prisma.user.findUnique({
+      where: { id: assignedToId },
+    });
+
+    // Log activity for each lead
+    if (leads.length > 0 && assignedTo) {
+      for (const lead of leads) {
+        await this.activityService.logLeadAssigned(
+          lead.workspaceId,
+          assignedToId,
+          lead.id,
+          `${lead.firstName} ${lead.lastName}`,
+          `${assignedTo.firstName} ${assignedTo.lastName}`,
+        );
+      }
+    }
 
     return {
       message: `${result.count} leads assigned successfully`,

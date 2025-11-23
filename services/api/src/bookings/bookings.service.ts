@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../common/notifications/email.service';
 import { SmsService } from '../common/notifications/sms.service';
+import { ActivityService } from '../common/activity/activity.service';
+import { CalendarService } from '../common/calendar/calendar.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -10,6 +12,8 @@ export class BookingsService {
     private prisma: PrismaService,
     private emailService: EmailService,
     private smsService: SmsService,
+    private activityService: ActivityService,
+    private calendarService: CalendarService,
   ) {}
 
   async create(data: {
@@ -21,7 +25,7 @@ export class BookingsService {
   }) {
     const bookingToken = randomBytes(16).toString('hex');
 
-    return this.prisma.booking.create({
+    const booking = await this.prisma.booking.create({
       data: {
         ...data,
         bookingToken,
@@ -32,6 +36,17 @@ export class BookingsService {
         lead: true,
       },
     });
+
+    // Log activity
+    await this.activityService.logBookingCreated(
+      data.workspaceId,
+      undefined,
+      booking.id,
+      `${booking.lead.firstName} ${booking.lead.lastName}`,
+      data.scheduledAt,
+    );
+
+    return booking;
   }
 
   async findByWorkspace(workspaceId: string) {
@@ -110,6 +125,11 @@ export class BookingsService {
       console.error('Failed to send booking confirmation notifications:', error);
     }
 
+    // Sync to Google Calendar (async, don't wait)
+    this.calendarService.syncBookingToCalendar(booking.id).catch((error) => {
+      console.error('Failed to sync booking to calendar:', error);
+    });
+
     return booking;
   }
 
@@ -161,6 +181,15 @@ export class BookingsService {
     } catch (error) {
       console.error('Failed to send booking cancellation notifications:', error);
     }
+
+    // Log activity
+    await this.activityService.logBookingCancelled(
+      booking.workspaceId,
+      undefined,
+      booking.id,
+      `${booking.lead.firstName} ${booking.lead.lastName}`,
+      reason,
+    );
 
     return booking;
   }

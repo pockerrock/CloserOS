@@ -44,8 +44,12 @@ export class DealsController {
 
   @Patch(':id/stage')
   @ApiOperation({ summary: 'Update deal stage' })
-  async updateStage(@Param('id') id: string, @Body('stage') stage: DealStage) {
-    return this.dealsService.updateStage(id, stage);
+  async updateStage(
+    @Param('id') id: string,
+    @Body('stage') stage: DealStage,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.dealsService.updateStage(id, stage, userId);
   }
 
   @Post(':id/mark-paid')
