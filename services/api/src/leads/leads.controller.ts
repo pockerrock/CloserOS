@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { LeadsService } from './leads.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -86,5 +87,15 @@ export class LeadsController {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=leads-${Date.now()}.csv`);
     res.send(csv);
+  }
+
+  @Post('import/csv')
+  @ApiOperation({ summary: 'Import leads from CSV file' })
+  @UseInterceptors(FileInterceptor('file'))
+  async importLeads(
+    @CurrentUser() user: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.leadsService.importFromCSV(file.buffer.toString('utf-8'), user.workspaceId, user.id);
   }
 }

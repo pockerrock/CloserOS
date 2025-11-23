@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { leadsAPI } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 interface Lead {
   id: string;
@@ -22,8 +23,13 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
+  const toast = useToast();
 
   useEffect(() => {
     loadLeads();
@@ -32,17 +38,34 @@ export default function LeadsPage() {
     if (searchParams?.get('action') === 'new') {
       setShowCreateModal(true);
     }
-  }, [searchParams]);
+  }, [searchParams, searchQuery, statusFilter, sourceFilter]);
 
   const loadLeads = async () => {
     try {
-      const response = await leadsAPI.getAll();
+      setLoading(true);
+      const params: { search?: string; status?: string; source?: string } = {};
+      if (searchQuery) params.search = searchQuery;
+      if (statusFilter) params.status = statusFilter;
+      if (sourceFilter) params.source = sourceFilter;
+
+      const response = await leadsAPI.getAll(Object.keys(params).length > 0 ? params : undefined);
       setLeads(response.data);
     } catch (error) {
       console.error('Failed to load leads:', error);
+      toast.error('Failed to load leads');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setSourceFilter('');
   };
 
   if (loading) {
@@ -68,6 +91,116 @@ export default function LeadsPage() {
           <span>➕</span>
           <span>New Lead</span>
         </button>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex flex-wrap gap-4">
+          {/* Search Input */}
+          <div className="flex-1 min-w-[300px]">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by name, email, or phone..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <svg
+                className="absolute left-3 top-3 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div className="w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">All Statuses</option>
+              <option value="NEW">New</option>
+              <option value="CONTACTED">Contacted</option>
+              <option value="QUALIFIED">Qualified</option>
+              <option value="UNQUALIFIED">Unqualified</option>
+            </select>
+          </div>
+
+          {/* Source Filter */}
+          <div className="w-48">
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">All Sources</option>
+              <option value="WEBSITE">Website</option>
+              <option value="REFERRAL">Referral</option>
+              <option value="COLD_CALL">Cold Call</option>
+              <option value="SOCIAL_MEDIA">Social Media</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchQuery || statusFilter || sourceFilter) && (
+            <button
+              onClick={handleClearFilters}
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 transition"
+            >
+              Clear Filters
+            </button>
+          )}
+
+          {/* Import CSV Button */}
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v6m0 0l3-3m-3 3l-3-3m10 4H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V13a2 2 0 00-2-2z"
+              />
+            </svg>
+            <span>Import CSV</span>
+          </button>
+
+          {/* Export CSV Button */}
+          <a
+            href="/api/leads/export/csv"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span>Export CSV</span>
+          </a>
+        </div>
+
+        {/* Results Count */}
+        <div className="mt-3 text-sm text-gray-600">
+          Showing {leads.length} lead{leads.length !== 1 ? 's' : ''}
+          {(searchQuery || statusFilter || sourceFilter) && ' (filtered)'}
+        </div>
       </div>
 
       {/* Leads Table */}
@@ -170,10 +303,32 @@ export default function LeadsPage() {
           }}
           onSuccess={() => {
             setShowCreateModal(false);
+            toast.success('Lead created successfully');
             loadLeads();
             if (searchParams?.get('action') === 'new') {
               router.push('/leads');
             }
+          }}
+          onError={(message) => {
+            toast.error(message || 'Failed to create lead');
+          }}
+        />
+      )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <ImportCSVModal
+          onClose={() => setShowImportModal(false)}
+          onSuccess={(result) => {
+            setShowImportModal(false);
+            toast.success(`Successfully imported ${result.imported} leads`);
+            if (result.failed > 0) {
+              toast.warning(`${result.failed} leads failed to import`);
+            }
+            loadLeads();
+          }}
+          onError={(message) => {
+            toast.error(message || 'Failed to import leads');
           }}
         />
       )}
@@ -181,7 +336,15 @@ export default function LeadsPage() {
   );
 }
 
-function CreateLeadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function CreateLeadModal({
+  onClose,
+  onSuccess,
+  onError,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: (message: string) => void;
+}) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -191,18 +354,16 @@ function CreateLeadModal({ onClose, onSuccess }: { onClose: () => void; onSucces
     notes: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       await leadsAPI.create(formData);
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create lead');
+      onError(err.response?.data?.message || 'Failed to create lead');
     } finally {
       setLoading(false);
     }
@@ -220,12 +381,6 @@ function CreateLeadModal({ onClose, onSuccess }: { onClose: () => void; onSucces
             ×
           </button>
         </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -317,6 +472,189 @@ function CreateLeadModal({ onClose, onSuccess }: { onClose: () => void; onSucces
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create Lead'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function ImportCSVModal({
+  onClose,
+  onSuccess,
+  onError,
+}: {
+  onClose: () => void;
+  onSuccess: (result: { total: number; imported: number; failed: number; errors: string[] }) => void;
+  onError: (message: string) => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.name.endsWith('.csv')) {
+        setFile(droppedFile);
+      } else {
+        onError('Please upload a CSV file');
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      if (selectedFile.name.endsWith('.csv')) {
+        setFile(selectedFile);
+      } else {
+        onError('Please upload a CSV file');
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      onError('Please select a CSV file');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await leadsAPI.importCSV(file);
+      onSuccess(response.data);
+    } catch (err: any) {
+      onError(err.response?.data?.message || 'Failed to import CSV');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">Import Leads from CSV</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* File Upload Area */}
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition ${
+              dragActive
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            {file ? (
+              <div>
+                <svg
+                  className="w-12 h-12 mx-auto text-green-600 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p className="text-lg font-semibold text-gray-900">{file.name}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {(file.size / 1024).toFixed(2)} KB
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFile(null)}
+                  className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                >
+                  Choose different file
+                </button>
+              </div>
+            ) : (
+              <div>
+                <svg
+                  className="w-12 h-12 mx-auto text-gray-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p className="text-gray-600 mb-2">Drag and drop your CSV file here, or</p>
+                <label className="cursor-pointer text-blue-600 hover:text-blue-700 font-semibold">
+                  browse files
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* CSV Format Info */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-semibold text-blue-900 mb-2">CSV Format Requirements:</h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Required columns: First Name, Last Name, Email</li>
+              <li>• Optional columns: Phone, Source, Notes</li>
+              <li>• First row must contain column headers</li>
+              <li>• Use comma (,) as separator</li>
+            </ul>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!file || loading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? 'Importing...' : 'Import Leads'}
             </button>
           </div>
         </form>

@@ -34,10 +34,12 @@ export default function DealsPage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [groupedDeals, setGroupedDeals] = useState<Record<string, Deal[]>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [stageFilter, setStageFilter] = useState('');
 
   useEffect(() => {
     loadDeals();
-  }, []);
+  }, [searchQuery, stageFilter]);
 
   useEffect(() => {
     // Group deals by stage
@@ -50,13 +52,27 @@ export default function DealsPage() {
 
   const loadDeals = async () => {
     try {
-      const response = await dealsAPI.getAll();
+      setLoading(true);
+      const params: { search?: string; stage?: string } = {};
+      if (searchQuery) params.search = searchQuery;
+      if (stageFilter) params.stage = stageFilter;
+
+      const response = await dealsAPI.getAll(Object.keys(params).length > 0 ? params : undefined);
       setDeals(response.data);
     } catch (error) {
       console.error('Failed to load deals:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStageFilter('');
   };
 
   const handleCheckout = async (dealId: string) => {
@@ -96,6 +112,85 @@ export default function DealsPage() {
             </span>{' '}
             Total Value
           </span>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex flex-wrap gap-4">
+          {/* Search Input */}
+          <div className="flex-1 min-w-[300px]">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by lead name or email..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <svg
+                className="absolute left-3 top-3 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Stage Filter */}
+          <div className="w-48">
+            <select
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">All Stages</option>
+              {DEAL_STAGES.map((stage) => (
+                <option key={stage.key} value={stage.key}>
+                  {stage.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchQuery || stageFilter) && (
+            <button
+              onClick={handleClearFilters}
+              className="px-4 py-2 text-gray-600 hover:text-gray-900 transition"
+            >
+              Clear Filters
+            </button>
+          )}
+
+          {/* Export CSV Button */}
+          <a
+            href="/api/deals/export/csv"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span>Export CSV</span>
+          </a>
+        </div>
+
+        {/* Results Count */}
+        <div className="mt-3 text-sm text-gray-600">
+          Showing {deals.length} deal{deals.length !== 1 ? 's' : ''}
+          {(searchQuery || stageFilter) && ' (filtered)'}
         </div>
       </div>
 

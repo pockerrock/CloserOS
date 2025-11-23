@@ -3,13 +3,17 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AnalyticsService } from './analytics.service';
+import { ActivityService } from '../common/activity/activity.service';
 
 @ApiTags('analytics')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('analytics')
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(
+    private readonly analyticsService: AnalyticsService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   @Get('dashboard')
   @ApiOperation({ summary: 'Get dashboard analytics' })
@@ -30,5 +34,14 @@ export class AnalyticsController {
   @ApiOperation({ summary: 'Get team performance metrics' })
   async getTeamPerformance(@CurrentUser('workspaceId') workspaceId: string) {
     return this.analyticsService.getTeamPerformance(workspaceId);
+  }
+
+  @Get('activity')
+  @ApiOperation({ summary: 'Get recent activity feed' })
+  async getRecentActivity(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.activityService.findByWorkspace(workspaceId, limit ? parseInt(limit) : 50);
   }
 }

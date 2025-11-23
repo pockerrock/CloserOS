@@ -82,21 +82,42 @@ export const authAPI = {
 
 // Leads API
 export const leadsAPI = {
-  getAll: () => api.get('/leads'),
+  getAll: (params?: { search?: string; status?: string; source?: string }) =>
+    api.get('/leads', { params }),
   getById: (id: string) => api.get(`/leads/${id}`),
   create: (data: any) => api.post('/leads', data),
   update: (id: string, data: any) => api.patch(`/leads/${id}`, data),
   delete: (id: string) => api.delete(`/leads/${id}`),
+  bulkAssign: (leadIds: string[], assignedToId: string) =>
+    api.post('/leads/bulk/assign', { leadIds, assignedToId }),
+  bulkUpdate: (leadIds: string[], updates: any) =>
+    api.post('/leads/bulk/update', { leadIds, updates }),
+  bulkDelete: (leadIds: string[]) =>
+    api.post('/leads/bulk/delete', { leadIds }),
+  importCSV: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/leads/import/csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // Deals API
 export const dealsAPI = {
-  getAll: () => api.get('/deals'),
+  getAll: (params?: { search?: string; stage?: string; closerId?: string }) =>
+    api.get('/deals', { params }),
   getById: (id: string) => api.get(`/deals/${id}`),
   create: (data: any) => api.post('/deals', data),
   updateStage: (id: string, stage: string) => api.patch(`/deals/${id}/stage`, { stage }),
   createCheckout: (id: string) => api.post(`/deals/${id}/checkout`),
   markPaid: (id: string, stripePaymentId: string) => api.post(`/deals/${id}/mark-paid`, { stripePaymentId }),
+  bulkUpdateStage: (dealIds: string[], stage: string) =>
+    api.post('/deals/bulk/update-stage', { dealIds, stage }),
+  bulkAssign: (dealIds: string[], closerId: string) =>
+    api.post('/deals/bulk/assign', { dealIds, closerId }),
+  bulkDelete: (dealIds: string[]) =>
+    api.post('/deals/bulk/delete', { dealIds }),
 };
 
 // Calls API

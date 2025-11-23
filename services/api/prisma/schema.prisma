@@ -49,6 +49,7 @@ model Workspace {
   bookings       Booking[]
   documents      Document[]
   calendarTokens CalendarToken[]
+  activities     Activity[]
   settings       WorkspaceSettings?
 
   @@index([slug])
@@ -109,6 +110,7 @@ model User {
   calls            Call[]
   refreshTokens    RefreshToken[]
   calendarTokens   CalendarToken[]
+  activities       Activity[]
 
   @@index([email])
   @@index([workspaceId])
@@ -390,4 +392,38 @@ model CalendarToken {
   @@unique([userId, provider])
   @@index([workspaceId])
   @@index([userId])
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Actor (who performed the action)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Activity type
+  type        String   // lead.created, deal.stage_changed, call.completed, etc.
+
+  // Activity details
+  title       String
+  description String?
+  metadata    Json?    // Additional structured data
+
+  // Related entities
+  leadId      String?
+  dealId      String?
+  callId      String?
+  bookingId   String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([dealId])
 }
