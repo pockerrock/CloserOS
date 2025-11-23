@@ -1,0 +1,78 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API
+        run: npm run build:api
+
+      # TODO: Add deployment steps
+      # - Deploy to AWS ECS/Fargate
+      # - Update environment variables
+      # - Run database migrations
+
+      - name: Deployment placeholder
+        run: echo "Deploy API to production"
+
+  deploy-web:
+    name: Deploy Web App
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web App
+        run: npm run build:web
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+
+      # TODO: Deploy to Vercel or AWS
+      - name: Deployment placeholder
+        run: echo "Deploy web app to production"
+
+  deploy-landing:
+    name: Deploy Landing
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Landing
+        run: npm run build:landing
+
+      # TODO: Deploy to Vercel
+      - name: Deployment placeholder
+        run: echo "Deploy landing to production"

@@ -1,0 +1,393 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  CLOSER
+  SETTER
+}
+
+enum DealStage {
+  NEW
+  QUALIFIED
+  SCHEDULED
+  SHOWED
+  CLOSED
+  PAID
+  RECYCLE
+}
+
+enum CallStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users          User[]
+  leads          Lead[]
+  deals          Deal[]
+  calls          Call[]
+  bookings       Booking[]
+  documents      Document[]
+  calendarTokens CalendarToken[]
+  settings       WorkspaceSettings?
+
+  @@index([slug])
+}
+
+model WorkspaceSettings {
+  id          String @id @default(uuid())
+  workspaceId String @unique
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Scheduling settings
+  defaultReminderMinutes Int      @default(60)
+  enableSmsReminders     Boolean  @default(true)
+  enableEmailReminders   Boolean  @default(true)
+
+  // Call settings
+  enableRecording        Boolean  @default(true)
+  autoStartRecording     Boolean  @default(true)
+
+  // AI settings
+  enableAiSummary        Boolean  @default(true)
+  enableRealTimeWhisper  Boolean  @default(false)
+
+  // No-show settings
+  noShowThresholdMinutes Int      @default(15)
+  enableAutoRecovery     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // 2FA
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+
+  // Avatar
+  avatarUrl    String?
+
+  // Timestamps
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  leadsCreated     Lead[]    @relation("LeadCreator")
+  leadsAssigned    Lead[]    @relation("LeadAssignee")
+  deals            Deal[]
+  calls            Call[]
+  refreshTokens    RefreshToken[]
+  calendarTokens   CalendarToken[]
+
+  @@index([email])
+  @@index([workspaceId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Lead {
+  id          String   @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Contact info
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  timezone    String   @default("UTC")
+
+  // Lead source
+  source      String?
+
+  // Assignment
+  createdById String?
+  createdBy   User?    @relation("LeadCreator", fields: [createdById], references: [id])
+  assignedToId String?
+  assignedTo  User?    @relation("LeadAssignee", fields: [assignedToId], references: [id])
+
+  // Metadata
+  notes       String?
+  customFields Json?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  deals       Deal[]
+  bookings    Booking[]
+
+  @@index([workspaceId])
+  @@index([email])
+  @@index([assignedToId])
+}
+
+model Deal {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Lead
+  leadId      String
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Stage
+  stage       DealStage @default(NEW)
+
+  // Closer
+  closerId    String?
+  closer      User?     @relation(fields: [closerId], references: [id])
+
+  // Deal value
+  amount      Decimal?  @db.Decimal(10, 2)
+  currency    String    @default("USD")
+
+  // Payment
+  stripePaymentId String?
+  paidAt      DateTime?
+
+  // Contract
+  contractUrl String?
+  contractSignedAt DateTime?
+
+  // Metadata
+  notes       String?
+  customFields Json?
+
+  // Timestamps
+  closedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  calls       Call[]
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([closerId])
+  @@index([stage])
+}
+
+model Booking {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Lead
+  leadId      String
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Scheduling
+  scheduledAt DateTime
+  duration    Int       @default(60) // minutes
+  timezone    String    @default("UTC")
+
+  // Status
+  confirmed   Boolean   @default(false)
+  cancelled   Boolean   @default(false)
+  cancelledAt DateTime?
+  cancelReason String?
+
+  // Reminders
+  remindersSent Json?    // Array of timestamps when reminders were sent
+
+  // Calendar
+  googleEventId  String?
+  outlookEventId String?
+
+  // Public booking link
+  bookingToken String   @unique
+
+  // Metadata
+  notes       String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  call        Call?
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([scheduledAt])
+  @@index([bookingToken])
+}
+
+model Call {
+  id          String     @id @default(uuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Booking
+  bookingId   String?    @unique
+  booking     Booking?   @relation(fields: [bookingId], references: [id])
+
+  // Deal
+  dealId      String?
+  deal        Deal?      @relation(fields: [dealId], references: [id])
+
+  // Host (closer/setter)
+  hostId      String
+  host        User       @relation(fields: [hostId], references: [id])
+
+  // Call details
+  status      CallStatus @default(SCHEDULED)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  duration    Int?       // seconds
+
+  // Daily.co
+  dailyRoomName String?
+  dailyRoomUrl  String?
+
+  // Recording
+  recordingUrl  String?
+  recordingReady Boolean   @default(false)
+
+  // Transcript & AI
+  transcript    String?
+  transcriptReady Boolean  @default(false)
+
+  // AI Summary
+  aiSummary     String?
+  aiConfidence  Decimal?  @db.Decimal(3, 2)
+  aiTags        String[]  // objections, sentiment, etc.
+
+  // Consent
+  recordingConsent Boolean @default(false)
+  consentTimestamp DateTime?
+
+  // Metadata
+  notes         String?
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([hostId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model Document {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // File info
+  fileName    String
+  fileType    String
+  fileSize    Int
+  s3Key       String
+  s3Url       String
+
+  // Content
+  extractedText String?
+
+  // Embeddings
+  embeddingStatus String   @default("pending") // pending, processing, completed, failed
+  embeddingError  String?
+  embeddedAt      DateTime?
+
+  // Metadata
+  description String?
+  tags        String[]
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  embeddings  DocumentEmbedding[]
+
+  @@index([workspaceId])
+  @@index([embeddingStatus])
+}
+
+model DocumentEmbedding {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Embedding data
+  content    String   // The chunk of text
+  embedding  Unsupported("vector(1536)")?  // pgvector type for OpenAI embeddings
+  metadata   Json?
+
+  // Timestamps
+  createdAt  DateTime @default(now())
+
+  @@index([documentId])
+}
+
+model CalendarToken {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Provider (google, outlook)
+  provider    String
+
+  // Tokens
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+
+  // Metadata
+  email       String?
+  scope       String?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, provider])
+  @@index([workspaceId])
+  @@index([userId])
+}

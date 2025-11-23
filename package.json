@@ -1,0 +1,44 @@
+{
+  "name": "closeros",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered OS for high-ticket closers & setters",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "docker-compose up -d && concurrently \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:landing\"",
+    "dev:api": "cd services/api && npm run start:dev",
+    "dev:web": "cd apps/web-app && npm run dev",
+    "dev:landing": "cd apps/landing && npm run dev",
+    "dev:ai": "cd services/ai && python -m uvicorn main:app --reload",
+    "build": "npm run build:api && npm run build:web && npm run build:landing",
+    "build:api": "cd services/api && npm run build",
+    "build:web": "cd apps/web-app && npm run build",
+    "build:landing": "cd apps/landing && npm run build",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "cd services/api && npm run test",
+    "test:web": "cd apps/web-app && npm run test",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "db:migrate": "cd services/api && npx prisma migrate dev",
+    "db:seed": "cd services/api && npx prisma db seed",
+    "db:studio": "cd services/api && npx prisma studio"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

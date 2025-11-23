@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: closeros-postgres
+    environment:
+      POSTGRES_USER: closeros
+      POSTGRES_PASSWORD: closeros_dev_password
+      POSTGRES_DB: closeros_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker-compose/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U closeros"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: closeros-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: closeros-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MinIO bucket creation
+  minio-setup:
+    image: minio/mc:latest
+    container_name: closeros-minio-setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/closeros-recordings --ignore-existing;
+      /usr/bin/mc mb myminio/closeros-documents --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/closeros-recordings;
+      exit 0;
+      "
+
+  # Mock STT service (optional for development)
+  mock-stt:
+    build:
+      context: ./services/ai
+      dockerfile: Dockerfile.mock-stt
+    container_name: closeros-mock-stt
+    ports:
+      - "8001:8001"
+    environment:
+      - MOCK_MODE=true
+    profiles:
+      - mock
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  default:
+    name: closeros-network
