@@ -105,4 +105,77 @@ export class LeadsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async bulkAssign(leadIds: string[], assignedToId: string) {
+    const result = await this.prisma.lead.updateMany({
+      where: { id: { in: leadIds } },
+      data: { assignedToId },
+    });
+
+    return {
+      message: `${result.count} leads assigned successfully`,
+      count: result.count,
+    };
+  }
+
+  async bulkUpdate(leadIds: string[], updates: any) {
+    const result = await this.prisma.lead.updateMany({
+      where: { id: { in: leadIds } },
+      data: updates,
+    });
+
+    return {
+      message: `${result.count} leads updated successfully`,
+      count: result.count,
+    };
+  }
+
+  async bulkDelete(leadIds: string[]) {
+    const result = await this.prisma.lead.deleteMany({
+      where: { id: { in: leadIds } },
+    });
+
+    return {
+      message: `${result.count} leads deleted successfully`,
+      count: result.count,
+    };
+  }
+
+  async exportToCSV(workspaceId: string): Promise<string> {
+    const leads = await this.prisma.lead.findMany({
+      where: { workspaceId },
+      include: {
+        createdBy: true,
+        assignedTo: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // CSV header
+    const header = 'ID,First Name,Last Name,Email,Phone,Status,Source,Timezone,Created By,Assigned To,Created At,Notes\n';
+
+    // CSV rows
+    const rows = leads.map((lead) => {
+      const createdBy = lead.createdBy ? `${lead.createdBy.firstName} ${lead.createdBy.lastName}` : '';
+      const assignedTo = lead.assignedTo ? `${lead.assignedTo.firstName} ${lead.assignedTo.lastName}` : '';
+      const notes = (lead.notes || '').replace(/"/g, '""').replace(/\n/g, ' ');
+
+      return [
+        lead.id,
+        lead.firstName,
+        lead.lastName,
+        lead.email,
+        lead.phone || '',
+        lead.status || '',
+        lead.source || '',
+        lead.timezone || '',
+        createdBy,
+        assignedTo,
+        lead.createdAt.toISOString(),
+        `"${notes}"`,
+      ].join(',');
+    }).join('\n');
+
+    return header + rows;
+  }
 }

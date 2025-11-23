@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../common/notifications/email.service';
+import { SmsService } from '../common/notifications/sms.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class BookingsService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private smsService: SmsService,
   ) {}
 
   async create(data: {
@@ -79,19 +81,33 @@ export class BookingsService {
       },
     });
 
-    // Send confirmation email
+    // Send confirmation notifications
     try {
       const closer = booking.workspace.users[0];
+      const leadName = `${booking.lead.firstName} ${booking.lead.lastName}`;
+      const closerName = closer ? `${closer.firstName} ${closer.lastName}` : 'your closer';
+      const dateTime = booking.scheduledAt.toLocaleString();
+
+      // Send email
       if (booking.lead.email && closer) {
         await this.emailService.sendBookingConfirmation(booking.lead.email, {
-          leadName: `${booking.lead.firstName} ${booking.lead.lastName}`,
-          closerName: `${closer.firstName} ${closer.lastName}`,
-          dateTime: booking.scheduledAt.toLocaleString(),
+          leadName,
+          closerName,
+          dateTime,
           duration: booking.duration,
         });
       }
+
+      // Send SMS
+      if (booking.lead.phone) {
+        await this.smsService.sendBookingConfirmation(booking.lead.phone, {
+          leadName,
+          closerName,
+          dateTime,
+        });
+      }
     } catch (error) {
-      console.error('Failed to send booking confirmation email:', error);
+      console.error('Failed to send booking confirmation notifications:', error);
     }
 
     return booking;
@@ -118,19 +134,32 @@ export class BookingsService {
       },
     });
 
-    // Send cancellation email
+    // Send cancellation notifications
     try {
       const closer = booking.workspace.users[0];
+      const leadName = `${booking.lead.firstName} ${booking.lead.lastName}`;
+      const closerName = closer ? `${closer.firstName} ${closer.lastName}` : 'your closer';
+      const dateTime = booking.scheduledAt.toLocaleString();
+
+      // Send email
       if (booking.lead.email && closer) {
         await this.emailService.sendBookingCancellation(booking.lead.email, {
-          leadName: `${booking.lead.firstName} ${booking.lead.lastName}`,
-          closerName: `${closer.firstName} ${closer.lastName}`,
-          dateTime: booking.scheduledAt.toLocaleString(),
+          leadName,
+          closerName,
+          dateTime,
           reason,
         });
       }
+
+      // Send SMS
+      if (booking.lead.phone) {
+        await this.smsService.sendBookingCancellation(booking.lead.phone, {
+          leadName,
+          dateTime,
+        });
+      }
     } catch (error) {
-      console.error('Failed to send booking cancellation email:', error);
+      console.error('Failed to send booking cancellation notifications:', error);
     }
 
     return booking;

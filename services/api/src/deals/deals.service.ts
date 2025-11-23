@@ -145,4 +145,78 @@ export class DealsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async bulkUpdateStage(dealIds: string[], stage: DealStage) {
+    const result = await this.prisma.deal.updateMany({
+      where: { id: { in: dealIds } },
+      data: { stage },
+    });
+
+    return {
+      message: `${result.count} deals updated to stage ${stage}`,
+      count: result.count,
+    };
+  }
+
+  async bulkAssign(dealIds: string[], closerId: string) {
+    const result = await this.prisma.deal.updateMany({
+      where: { id: { in: dealIds } },
+      data: { closerId },
+    });
+
+    return {
+      message: `${result.count} deals assigned successfully`,
+      count: result.count,
+    };
+  }
+
+  async bulkDelete(dealIds: string[]) {
+    const result = await this.prisma.deal.deleteMany({
+      where: { id: { in: dealIds } },
+    });
+
+    return {
+      message: `${result.count} deals deleted successfully`,
+      count: result.count,
+    };
+  }
+
+  async exportToCSV(workspaceId: string): Promise<string> {
+    const deals = await this.prisma.deal.findMany({
+      where: { workspaceId },
+      include: {
+        lead: true,
+        closer: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // CSV header
+    const header = 'ID,Deal Name,Lead Name,Lead Email,Closer,Stage,Amount,Currency,Payment ID,Created At,Paid At\n';
+
+    // CSV rows
+    const rows = deals.map((deal) => {
+      const leadName = deal.lead ? `${deal.lead.firstName} ${deal.lead.lastName}` : '';
+      const leadEmail = deal.lead?.email || '';
+      const closerName = deal.closer ? `${deal.closer.firstName} ${deal.closer.lastName}` : '';
+      const amount = deal.amount ? Number(deal.amount).toFixed(2) : '0.00';
+      const paidAt = deal.paidAt ? deal.paidAt.toISOString() : '';
+
+      return [
+        deal.id,
+        deal.name || '',
+        leadName,
+        leadEmail,
+        closerName,
+        deal.stage,
+        amount,
+        deal.currency || 'USD',
+        deal.stripePaymentId || '',
+        deal.createdAt.toISOString(),
+        paidAt,
+      ].join(',');
+    }).join('\n');
+
+    return header + rows;
+  }
 }

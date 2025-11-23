@@ -2,11 +2,97 @@
 
 **AI-powered OS for high-ticket closers & setters**
 
-Version: 2.0 — 2025-11-23
+Version: 3.0 — 2025-11-23
 
 ## 🎯 Overview
 
 CloserOS combines scheduling, native calling, AI whisper coaching (trained on company docs), payments/contracts, and funnel analytics in one platform to reduce no-shows, shorten ramp time, and increase close rates for high-ticket sales teams.
+
+## ✨ What's New in Parts 6 & 7 (Latest)
+
+### 🔔 Notifications & Communication
+
+#### SMS Service
+- ✅ **Twilio Integration**: Complete SMS notification service
+- ✅ **Booking Reminders**: Automated SMS reminders for upcoming calls
+- ✅ **Confirmations**: SMS notifications for booking confirmations and cancellations
+- ✅ **Payment Alerts**: SMS confirmation for successful payments
+- ✅ **Follow-up Reminders**: Task reminders for closers
+- ✅ **Mock Mode**: Development mode without Twilio credentials
+
+#### Email Service Enhancements
+- ✅ **Booking Notifications**: Professional HTML emails for confirmations/cancellations
+- ✅ **Payment Receipts**: Branded receipts with transaction details
+- ✅ **Call Summaries**: AI-generated summaries sent via email
+- ✅ **Team Invitations**: Workspace invite emails with onboarding
+- ✅ **Template System**: Reusable HTML email templates
+
+### 🎬 Background Job Processing
+
+#### Bull Queue Integration
+- ✅ **AI Processor**: Background jobs for document processing and call transcription
+- ✅ **Document Processing Job**: Automatic embedding generation on upload
+- ✅ **Call Transcription Job**: Triggered by Daily.co webhook when recording ready
+- ✅ **Status Tracking**: Real-time job status updates (pending → processing → completed/failed)
+- ✅ **Redis Queue**: Scalable job queue with Bull
+
+### 📊 Analytics Dashboard
+
+#### Complete Analytics UI
+- ✅ **KPI Cards**: Total leads, deals, calls, revenue with period filters
+- ✅ **Sales Funnel Visualization**: Interactive funnel with stage progression bars
+- ✅ **Team Performance Table**: Closer leaderboard with deals closed and revenue
+- ✅ **Period Filters**: 7d, 30d, 90d time range selection
+- ✅ **Real-time Updates**: Dynamic data refresh
+- ✅ **Responsive Charts**: Beautiful gradient designs and animations
+
+### 🔍 Search & Filtering
+
+#### Advanced Search
+- ✅ **Leads Search**: Full-text search across name, email, phone
+- ✅ **Deals Search**: Search by deal name, lead name, lead email
+- ✅ **Case-Insensitive**: Smart search with mode: 'insensitive'
+- ✅ **Multiple Filters**: Combine search with status, source, stage, closer
+- ✅ **Query Parameters**: URL-based filtering for bookmarkable searches
+
+### 🤖 RAG Query Interface
+
+#### AI-Powered Document Search
+- ✅ **Ask AI Modal**: Beautiful query interface for document questions
+- ✅ **Semantic Search**: pgvector-based similarity search
+- ✅ **Source Citations**: Display relevant document chunks with relevance scores
+- ✅ **Confidence Indicators**: AI confidence percentage for answers
+- ✅ **Context-Aware**: Uses top-k retrieval for accurate responses
+- ✅ **Natural Language**: Ask questions in plain English
+
+### ⚡ Real-Time Features
+
+#### WebSocket Gateway
+- ✅ **Event Gateway**: Socket.io WebSocket server for real-time updates
+- ✅ **Workspace Rooms**: Automatic room joining by workspaceId
+- ✅ **JWT Authentication**: Secure WebSocket connections
+- ✅ **Event Notifications**: Real-time updates for leads, deals, calls, documents
+- ✅ **Connection Tracking**: User presence and connection management
+- ✅ **Broadcast Events**: Workspace-wide and user-specific notifications
+
+### 📦 Bulk Operations
+
+#### Mass Actions
+- ✅ **Bulk Assign Leads**: Assign multiple leads to a user at once
+- ✅ **Bulk Update Leads**: Update multiple leads simultaneously
+- ✅ **Bulk Delete Leads**: Delete multiple leads in one operation
+- ✅ **Bulk Update Deal Stages**: Move multiple deals through pipeline
+- ✅ **Bulk Assign Deals**: Assign deals to closers in bulk
+- ✅ **Bulk Delete Deals**: Clean up multiple deals at once
+
+### 📤 Data Export
+
+#### CSV Export
+- ✅ **Export Leads**: Download all leads as CSV with full details
+- ✅ **Export Deals**: Export deals with lead info, closer, payment status
+- ✅ **Formatted Output**: Proper CSV escaping and formatting
+- ✅ **Timestamped Files**: Auto-generated filenames with timestamps
+- ✅ **Complete Data**: All relevant fields included in exports
 
 ## ✨ What's New in Part 2
 

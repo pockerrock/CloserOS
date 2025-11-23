@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Response } from 'express';
 import { DealsService } from './deals.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -57,5 +58,39 @@ export class DealsController {
   @ApiOperation({ summary: 'Create Stripe checkout session for deal' })
   async createCheckout(@Param('id') id: string) {
     return this.dealsService.createCheckoutSession(id);
+  }
+
+  @Post('bulk/update-stage')
+  @ApiOperation({ summary: 'Bulk update deal stages' })
+  async bulkUpdateStage(
+    @Body() data: { dealIds: string[]; stage: DealStage },
+  ) {
+    return this.dealsService.bulkUpdateStage(data.dealIds, data.stage);
+  }
+
+  @Post('bulk/assign')
+  @ApiOperation({ summary: 'Bulk assign deals to a closer' })
+  async bulkAssignDeals(
+    @Body() data: { dealIds: string[]; closerId: string },
+  ) {
+    return this.dealsService.bulkAssign(data.dealIds, data.closerId);
+  }
+
+  @Post('bulk/delete')
+  @ApiOperation({ summary: 'Bulk delete deals' })
+  async bulkDeleteDeals(@Body() data: { dealIds: string[] }) {
+    return this.dealsService.bulkDelete(data.dealIds);
+  }
+
+  @Get('export/csv')
+  @ApiOperation({ summary: 'Export deals to CSV' })
+  async exportDeals(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Res() res: Response,
+  ) {
+    const csv = await this.dealsService.exportToCSV(workspaceId);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=deals-${Date.now()}.csv`);
+    res.send(csv);
   }
 }

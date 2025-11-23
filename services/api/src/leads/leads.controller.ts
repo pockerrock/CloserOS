@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Response } from 'express';
 import { LeadsService } from './leads.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -51,5 +52,39 @@ export class LeadsController {
   @ApiOperation({ summary: 'Delete lead' })
   async deleteLead(@Param('id') id: string) {
     return this.leadsService.delete(id);
+  }
+
+  @Post('bulk/assign')
+  @ApiOperation({ summary: 'Bulk assign leads to a user' })
+  async bulkAssignLeads(
+    @Body() data: { leadIds: string[]; assignedToId: string },
+  ) {
+    return this.leadsService.bulkAssign(data.leadIds, data.assignedToId);
+  }
+
+  @Post('bulk/update')
+  @ApiOperation({ summary: 'Bulk update leads' })
+  async bulkUpdateLeads(
+    @Body() data: { leadIds: string[]; updates: any },
+  ) {
+    return this.leadsService.bulkUpdate(data.leadIds, data.updates);
+  }
+
+  @Post('bulk/delete')
+  @ApiOperation({ summary: 'Bulk delete leads' })
+  async bulkDeleteLeads(@Body() data: { leadIds: string[] }) {
+    return this.leadsService.bulkDelete(data.leadIds);
+  }
+
+  @Get('export/csv')
+  @ApiOperation({ summary: 'Export leads to CSV' })
+  async exportLeads(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Res() res: Response,
+  ) {
+    const csv = await this.leadsService.exportToCSV(workspaceId);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=leads-${Date.now()}.csv`);
+    res.send(csv);
   }
 }
