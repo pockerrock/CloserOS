@@ -51,14 +51,19 @@ export class AiProcessor {
       // Store embeddings in database
       for (let i = 0; i < result.chunks.length; i++) {
         const chunk = result.chunks[i];
-        await this.prisma.documentEmbedding.create({
-          data: {
-            documentId,
-            content: chunk.text,
-            embedding: chunk.embedding,
-            metadata: { chunkIndex: i },
-          },
-        });
+
+        // Use raw SQL for embedding since it's an unsupported pgvector type
+        await this.prisma.$executeRaw`
+          INSERT INTO "DocumentEmbedding" (id, "documentId", content, embedding, metadata, "createdAt")
+          VALUES (
+            gen_random_uuid(),
+            ${documentId}::uuid,
+            ${chunk.text},
+            ${JSON.stringify(chunk.embedding)}::vector,
+            ${JSON.stringify({ chunkIndex: i })}::jsonb,
+            NOW()
+          )
+        `;
       }
 
       // Update document status to completed
