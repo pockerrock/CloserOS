@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -30,6 +30,15 @@ export class UsersController {
     @Body() data: { firstName?: string; lastName?: string; avatarUrl?: string },
   ) {
     return this.usersService.updateProfile(userId, data);
+  }
+
+  @Post('me/password')
+  @ApiOperation({ summary: 'Update current user password' })
+  async updatePassword(
+    @CurrentUser('id') userId: string,
+    @Body() data: { currentPassword: string; newPassword: string },
+  ) {
+    return this.usersService.updatePassword(userId, data.currentPassword, data.newPassword);
   }
 
   @Delete(':id')

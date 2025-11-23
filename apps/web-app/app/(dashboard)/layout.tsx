@@ -10,6 +10,8 @@ const navigation = [
   { name: 'Deals', href: '/deals', icon: '💼' },
   { name: 'Calls', href: '/calls', icon: '📞' },
   { name: 'Documents', href: '/documents', icon: '📄' },
+  { name: 'Team', href: '/team', icon: '👨‍👩‍👧‍👦' },
+  { name: 'Settings', href: '/settings', icon: '⚙️' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

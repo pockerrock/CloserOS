@@ -142,6 +142,8 @@ export const usersAPI = {
   getMe: () => api.get('/users/me'),
   getById: (id: string) => api.get(`/users/${id}`),
   updateProfile: (data: any) => api.patch('/users/me', data),
+  updatePassword: (currentPassword: string, newPassword: string) =>
+    api.post('/users/me/password', { currentPassword, newPassword }),
 };
 
 // Workspaces API

@@ -2,7 +2,7 @@
 
 **AI-powered OS for high-ticket closers & setters**
 
-Version: 1.2 — 2025-11-23
+Version: 1.3 — 2025-11-23
 
 ## 🎯 Overview
 
@@ -81,6 +81,76 @@ CloserOS combines scheduling, native calling, AI whisper coaching (trained on co
 - ✅ **Table Sorting**: Organized data display
 - ✅ **Responsive Design**: Mobile-friendly layouts
 - ✅ **Error Handling**: User-friendly error messages
+
+## ✨ What's New in Part 4
+
+### 📄 Detail Pages
+
+#### Lead Detail Page (`/leads/:id`)
+- ✅ **Lead Information**: Full lead profile with all details
+- ✅ **Edit Mode**: Inline editing of lead information
+- ✅ **Associated Deals**: List of all deals for this lead with stage indicators
+- ✅ **Quick Actions**: Email, call, create deal buttons
+- ✅ **Activity Timeline**: History of lead updates
+- ✅ **Delete Functionality**: Remove leads with confirmation
+
+#### Deal Detail Page (`/deals/:id`)
+- ✅ **Deal Overview**: Complete deal information and status
+- ✅ **Stage Management**: Quick stage updates with visual progress indicator
+- ✅ **Payment Details**: Stripe payment ID, paid date, amount
+- ✅ **Timeline View**: Chronological history of deal events
+- ✅ **Quick Actions**: Send payment link, email lead, view lead
+- ✅ **Progress Tracker**: Visual pipeline position indicator
+
+#### Call Detail Page (`/calls/:id`)
+- ✅ **Call Information**: Status, participants, scheduled time, duration
+- ✅ **Recording Viewer**: Embedded video player for call recordings
+- ✅ **Transcript Display**: Full call transcript when available
+- ✅ **AI Summary**: Automated call summary (when processed)
+- ✅ **Call Controls**: Start, rejoin, end call buttons
+- ✅ **Metrics Dashboard**: Recording status, transcript status, duration
+- ✅ **Timeline Events**: Call lifecycle visualization
+
+### ⚙️ Settings & Management
+
+#### User Settings (`/settings`)
+- ✅ **Profile Management**: Edit first name, last name
+- ✅ **Password Change**: Secure password update with validation
+- ✅ **Workspace Info**: View workspace name, ID, role
+- ✅ **Tabbed Interface**: Clean navigation between settings sections
+- ✅ **Success/Error Feedback**: Real-time validation and confirmation
+
+#### Team Management (`/team`)
+- ✅ **Team Overview**: Grid view of all workspace members
+- ✅ **Team Stats**: Total members, closers, setters, admins count
+- ✅ **Member Details**: Name, email, role, avatar display
+- ✅ **Invite Modal**: Email invitation with role selection
+- ✅ **Role-Based Access**: Only owners/admins can manage team
+- ✅ **Permission Indicators**: Visual feedback for user permissions
+
+### 🌐 Public Pages
+
+#### Booking Page (`/book/:token`)
+- ✅ **Public Access**: No login required, token-based access
+- ✅ **Booking Details**: Date, time, duration, sales rep info
+- ✅ **Confirmation**: One-click booking confirmation
+- ✅ **Cancellation**: Cancel with reason and feedback
+- ✅ **Status Display**: Pending, confirmed, canceled states
+- ✅ **Info Section**: What to expect, reminders, preparation tips
+- ✅ **Branded Experience**: Workspace name and professional layout
+
+### 🔌 Backend Enhancements
+
+#### Password Management
+- ✅ **Update Password Endpoint**: `POST /api/users/me/password`
+- ✅ **Current Password Verification**: Security validation
+- ✅ **Password Hashing**: bcrypt encryption
+- ✅ **Error Handling**: Clear error messages for invalid passwords
+
+#### API Improvements
+- ✅ **Enhanced Error Responses**: Detailed validation messages
+- ✅ **Password Security**: Minimum 8 characters enforced
+- ✅ **Token Validation**: Secure booking token verification
 
 ## 🏗️ Architecture
 
