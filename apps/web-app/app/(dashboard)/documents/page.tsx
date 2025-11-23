@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { documentsAPI } from '@/lib/api';
+import DocumentQueryModal from '@/components/DocumentQueryModal';
 
 interface Document {
   id: string;
@@ -19,6 +20,7 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [showQueryModal, setShowQueryModal] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -76,17 +78,27 @@ export default function DocumentsPage() {
           <h2 className="text-2xl font-bold text-gray-900">Documents</h2>
           <p className="text-gray-600 mt-1">Upload sales scripts, training docs, and more</p>
         </div>
-        <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 cursor-pointer">
-          <span>📄</span>
-          <span>{uploading ? 'Uploading...' : 'Upload Document'}</span>
-          <input
-            type="file"
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="hidden"
-            accept=".pdf,.doc,.docx,.txt"
-          />
-        </label>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowQueryModal(true)}
+            disabled={documents.length === 0}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-2"
+          >
+            <span>🤖</span>
+            <span>Ask AI</span>
+          </button>
+          <label className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 cursor-pointer">
+            <span>📄</span>
+            <span>{uploading ? 'Uploading...' : 'Upload Document'}</span>
+            <input
+              type="file"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt"
+            />
+          </label>
+        </div>
       </div>
 
       {/* Documents Grid */}
@@ -207,6 +219,9 @@ export default function DocumentsPage() {
           and training materials.
         </p>
       </div>
+
+      {/* Query Modal */}
+      <DocumentQueryModal isOpen={showQueryModal} onClose={() => setShowQueryModal(false)} />
     </div>
   );
 }

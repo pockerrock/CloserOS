@@ -106,4 +106,43 @@ export class DealsService {
       sessionUrl: session.url,
     };
   }
+
+  async search(
+    workspaceId: string,
+    filters: {
+      search?: string;
+      stage?: string;
+      closerId?: string;
+    },
+  ) {
+    const { search, stage, closerId } = filters;
+
+    const where: any = { workspaceId };
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { lead: { firstName: { contains: search, mode: 'insensitive' } } },
+        { lead: { lastName: { contains: search, mode: 'insensitive' } } },
+        { lead: { email: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (stage) {
+      where.stage = stage;
+    }
+
+    if (closerId) {
+      where.closerId = closerId;
+    }
+
+    return this.prisma.deal.findMany({
+      where,
+      include: {
+        lead: true,
+        closer: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

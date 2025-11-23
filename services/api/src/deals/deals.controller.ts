@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DealsService } from './deals.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,8 +22,16 @@ export class DealsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all deals in workspace' })
-  async getDeals(@CurrentUser('workspaceId') workspaceId: string) {
+  @ApiOperation({ summary: 'Get all deals in workspace with optional search and filters' })
+  async getDeals(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Query('search') search?: string,
+    @Query('stage') stage?: string,
+    @Query('closerId') closerId?: string,
+  ) {
+    if (search || stage || closerId) {
+      return this.dealsService.search(workspaceId, { search, stage, closerId });
+    }
     return this.dealsService.findByWorkspace(workspaceId);
   }
 

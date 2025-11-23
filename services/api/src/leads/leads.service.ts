@@ -65,4 +65,44 @@ export class LeadsService {
     await this.prisma.lead.delete({ where: { id } });
     return { message: 'Lead deleted successfully' };
   }
+
+  async search(
+    workspaceId: string,
+    filters: {
+      search?: string;
+      status?: string;
+      source?: string;
+    },
+  ) {
+    const { search, status, source } = filters;
+
+    const where: any = { workspaceId };
+
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (source) {
+      where.source = source;
+    }
+
+    return this.prisma.lead.findMany({
+      where,
+      include: {
+        createdBy: true,
+        assignedTo: true,
+        deals: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

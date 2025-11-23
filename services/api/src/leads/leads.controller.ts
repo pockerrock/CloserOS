@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { LeadsService } from './leads.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,8 +22,16 @@ export class LeadsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all leads in workspace' })
-  async getLeads(@CurrentUser('workspaceId') workspaceId: string) {
+  @ApiOperation({ summary: 'Get all leads in workspace with optional search and filters' })
+  async getLeads(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('source') source?: string,
+  ) {
+    if (search || status || source) {
+      return this.leadsService.search(workspaceId, { search, status, source });
+    }
     return this.leadsService.findByWorkspace(workspaceId);
   }
 

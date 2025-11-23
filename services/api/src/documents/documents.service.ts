@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { S3Service } from '../common/s3/s3.service';
+import { AiService } from '../common/ai/ai.service';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private prisma: PrismaService,
     private s3Service: S3Service,
+    private aiService: AiService,
+    @InjectQueue('ai') private aiQueue: Queue,
   ) {}
 
   async create(data: {
@@ -63,7 +68,7 @@ export class DocumentsService {
       file.mimetype,
     );
 
-    return this.create({
+    const document = await this.create({
       workspaceId,
       fileName: file.originalname,
       fileType: file.mimetype,
@@ -73,6 +78,14 @@ export class DocumentsService {
       description: metadata?.description,
       tags: metadata?.tags,
     });
+
+    // Trigger AI processing job
+    await this.aiQueue.add('process-document', {
+      documentId: document.id,
+      workspaceId,
+    });
+
+    return document;
   }
 
   async delete(id: string) {
@@ -90,5 +103,9 @@ export class DocumentsService {
 
     await this.prisma.document.delete({ where: { id } });
     return { message: 'Document deleted successfully' };
+  }
+
+  async queryDocuments(workspaceId: string, query: string, topK: number = 5) {
+    return this.aiService.queryDocuments(query, workspaceId, topK);
   }
 }

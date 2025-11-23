@@ -41,4 +41,13 @@ export class DocumentsController {
   async deleteDocument(@Param('id') id: string) {
     return this.documentsService.delete(id);
   }
+
+  @Post('query')
+  @ApiOperation({ summary: 'Query documents using RAG (Retrieval-Augmented Generation)' })
+  async queryDocuments(
+    @CurrentUser('workspaceId') workspaceId: string,
+    @Body() data: { query: string; topK?: number },
+  ) {
+    return this.documentsService.queryDocuments(workspaceId, data.query, data.topK);
+  }
 }

@@ -135,6 +135,7 @@ export const documentsAPI = {
     });
   },
   delete: (id: string) => api.delete(`/documents/${id}`),
+  query: (query: string, topK?: number) => api.post('/documents/query', { query, topK }),
 };
 
 // Users API
@@ -152,6 +153,13 @@ export const workspacesAPI = {
   update: (id: string, data: any) => api.patch(`/workspaces/${id}`, data),
   updateSettings: (id: string, settings: any) => api.patch(`/workspaces/${id}/settings`, settings),
   inviteUser: (id: string, email: string, role: string) => api.post(`/workspaces/${id}/invite`, { email, role }),
+};
+
+// Analytics API
+export const analyticsAPI = {
+  getDashboard: (period?: string) => api.get('/analytics/dashboard', { params: { period } }),
+  getFunnel: () => api.get('/analytics/funnel'),
+  getTeamPerformance: () => api.get('/analytics/team-performance'),
 };
 
 export default api;

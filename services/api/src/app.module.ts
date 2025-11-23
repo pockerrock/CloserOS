@@ -19,6 +19,8 @@ import { S3Module } from './common/s3/s3.module';
 import { StripeModule} from './common/stripe/stripe.module';
 import { DailyModule } from './common/daily/daily.module';
 import { AiModule } from './common/ai/ai.module';
+import { NotificationsModule } from './common/notifications/notifications.module';
+import { JobsModule } from './jobs/jobs.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -47,6 +49,8 @@ import { AppService } from './app.service';
     StripeModule,
     DailyModule,
     AiModule,
+    NotificationsModule,
+    JobsModule,
     AuthModule,
     UsersModule,
     WorkspacesModule,

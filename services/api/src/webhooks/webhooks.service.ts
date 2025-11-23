@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { StripeService } from '../common/stripe/stripe.service';
+import { EmailService } from '../common/notifications/email.service';
 import { DealStage } from '@prisma/client';
 
 @Injectable()
@@ -10,6 +13,8 @@ export class WebhooksService {
   constructor(
     private prisma: PrismaService,
     private stripeService: StripeService,
+    private emailService: EmailService,
+    @InjectQueue('ai') private aiQueue: Queue,
   ) {}
 
   async handleDailyWebhook(event: any) {
@@ -67,14 +72,31 @@ export class WebhooksService {
     }
 
     // Update deal to PAID
-    await this.prisma.deal.update({
+    const deal = await this.prisma.deal.update({
       where: { id: metadata.dealId },
       data: {
         stage: DealStage.PAID,
         stripePaymentId: sessionId,
         paidAt: new Date(),
       },
+      include: {
+        lead: true,
+      },
     });
+
+    // Send payment receipt email
+    try {
+      if (deal.lead.email) {
+        await this.emailService.sendPaymentReceipt(deal.lead.email, {
+          leadName: `${deal.lead.firstName} ${deal.lead.lastName}`,
+          amount: deal.amount ? Number(deal.amount) : 0,
+          dealName: deal.name,
+          transactionId: sessionId,
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send payment receipt email: ${error.message}`);
+    }
 
     this.logger.log(`Deal ${metadata.dealId} marked as PAID`);
     return { received: true, dealId: metadata.dealId };
@@ -131,7 +153,13 @@ export class WebhooksService {
 
     this.logger.log(`Recording ready for call ${callId}`);
 
-    // TODO: Trigger STT processing job
+    // Trigger transcription job
+    await this.aiQueue.add('transcribe-call', {
+      callId,
+      recordingUrl: data.download_url,
+    });
+
+    this.logger.log(`Transcription job queued for call ${callId}`);
     return { received: true, callId };
   }
 }
