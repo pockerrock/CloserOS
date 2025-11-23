@@ -19,19 +19,9 @@ export class DocumentsController {
   async uploadDocument(
     @CurrentUser() user: any,
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: any,
+    @Body() metadata: { description?: string; tags?: string[] },
   ) {
-    // TODO: Implement S3 upload
-    // For now, return a mock response
-    return this.documentsService.create({
-      workspaceId: user.workspaceId,
-      fileName: file?.originalname || 'unknown',
-      fileType: file?.mimetype || 'application/octet-stream',
-      fileSize: file?.size || 0,
-      s3Key: `documents/${user.workspaceId}/${Date.now()}-${file?.originalname}`,
-      s3Url: `https://example.com/documents/${file?.originalname}`,
-      ...metadata,
-    });
+    return this.documentsService.uploadDocument(user.workspaceId, file, metadata);
   }
 
   @Get()

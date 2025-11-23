@@ -44,4 +44,10 @@ export class DealsController {
   async markPaid(@Param('id') id: string, @Body('stripePaymentId') paymentId: string) {
     return this.dealsService.markPaid(id, paymentId);
   }
+
+  @Post(':id/checkout')
+  @ApiOperation({ summary: 'Create Stripe checkout session for deal' })
+  async createCheckout(@Param('id') id: string) {
+    return this.dealsService.createCheckoutSession(id);
+  }
 }

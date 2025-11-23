@@ -13,6 +13,9 @@ import { BookingsModule } from './bookings/bookings.module';
 import { DocumentsModule } from './documents/documents.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { PrismaModule } from './common/prisma/prisma.module';
+import { S3Module } from './common/s3/s3.module';
+import { StripeModule } from './common/stripe/stripe.module';
+import { DailyModule } from './common/daily/daily.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -36,6 +39,9 @@ import { AppService } from './app.service';
       },
     }),
     PrismaModule,
+    S3Module,
+    StripeModule,
+    DailyModule,
     AuthModule,
     UsersModule,
     WorkspacesModule,

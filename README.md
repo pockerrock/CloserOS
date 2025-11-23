@@ -8,6 +8,25 @@ Version: 1.1 — 2025-11-22
 
 CloserOS combines scheduling, native calling, AI whisper coaching (trained on company docs), payments/contracts, and funnel analytics in one platform to reduce no-shows, shorten ramp time, and increase close rates for high-ticket sales teams.
 
+## ✨ What's New in Part 2
+
+### 🔧 Backend Services
+- ✅ **S3 Service**: Complete file upload/download with MinIO (local) and AWS S3 (production) support
+- ✅ **Stripe Integration**: Full payment processing with checkout sessions, webhooks, and refunds
+- ✅ **Daily.co Service**: WebRTC calling with room creation, meeting tokens, and recordings
+- ✅ **Enhanced Webhooks**: Automatic deal updates on payment success, recording processing
+
+### 🎨 Frontend Application
+- ✅ **Authentication Pages**: Full login and register flows with validation
+- ✅ **API Client**: Axios-based client with automatic token refresh
+- ✅ **Auth Context**: React context for authentication state management
+- ✅ **Dashboard**: Welcome dashboard with user info and quick actions
+
+### 📡 API Enhancements
+- ✅ **Checkout Endpoint**: `POST /api/deals/:id/checkout` creates Stripe sessions
+- ✅ **Meeting Tokens**: Generate Daily.co tokens for secure call access
+- ✅ **Document Upload**: Real S3 upload with metadata support
+
 ## 🏗️ Architecture
 
 This is a monorepo containing:
