@@ -6,8 +6,30 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Create workspace
-  const workspace = await prisma.workspace.upsert({
+  // First, find or create the workspace
+  let workspace = await prisma.workspace.findUnique({
+    where: { slug: 'demo-workspace' },
+  });
+
+  if (workspace) {
+    console.log('🧹 Cleaning up existing seed data...');
+
+    // Delete in correct order due to foreign key constraints
+    await prisma.activity.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.call.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.booking.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.deal.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.lead.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.document.deleteMany({ where: { workspaceId: workspace.id } });
+    await prisma.documentEmbedding.deleteMany({
+      where: { document: { workspaceId: workspace.id } }
+    });
+
+    console.log('✅ Cleaned up existing data');
+  }
+
+  // Create or update workspace
+  workspace = await prisma.workspace.upsert({
     where: { slug: 'demo-workspace' },
     update: {},
     create: {
