@@ -38,7 +38,7 @@ export class AiProcessor {
       }
 
       // Download file from S3
-      const fileBuffer = await this.s3Service.downloadFile(document.s3Key);
+      const fileBuffer = await this.s3Service.getFile(this.s3Service['bucketDocuments'], document.s3Key);
 
       // Process document with AI service
       const result = await this.aiService.processDocument(
@@ -54,9 +54,9 @@ export class AiProcessor {
         await this.prisma.documentEmbedding.create({
           data: {
             documentId,
-            chunkText: chunk.text,
+            content: chunk.text,
             embedding: chunk.embedding,
-            chunkIndex: i,
+            metadata: { chunkIndex: i },
           },
         });
       }
@@ -100,8 +100,7 @@ export class AiProcessor {
         where: { id: callId },
         data: {
           transcript: transcript.text,
-          summary: summary.summary,
-          aiInsights: summary,
+          aiSummary: summary.summary,
         },
       });
 

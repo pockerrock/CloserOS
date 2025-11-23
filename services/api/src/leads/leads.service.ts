@@ -190,7 +190,7 @@ export class LeadsService {
     });
 
     // CSV header
-    const header = 'ID,First Name,Last Name,Email,Phone,Status,Source,Timezone,Created By,Assigned To,Created At,Notes\n';
+    const header = 'ID,First Name,Last Name,Email,Phone,Source,Timezone,Created By,Assigned To,Created At,Notes\n';
 
     // CSV rows
     const rows = leads.map((lead) => {
@@ -204,7 +204,6 @@ export class LeadsService {
         lead.lastName,
         lead.email,
         lead.phone || '',
-        lead.status || '',
         lead.source || '',
         lead.timezone || '',
         createdBy,

@@ -90,7 +90,7 @@ export class WebhooksService {
         await this.emailService.sendPaymentReceipt(deal.lead.email, {
           leadName: `${deal.lead.firstName} ${deal.lead.lastName}`,
           amount: deal.amount ? Number(deal.amount) : 0,
-          dealName: deal.name,
+          dealName: `Deal #${deal.id.slice(0, 8)}`,
           transactionId: sessionId,
         });
       }

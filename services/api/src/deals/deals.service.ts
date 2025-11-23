@@ -219,7 +219,7 @@ export class DealsService {
     });
 
     // CSV header
-    const header = 'ID,Deal Name,Lead Name,Lead Email,Closer,Stage,Amount,Currency,Payment ID,Created At,Paid At\n';
+    const header = 'ID,Lead Name,Lead Email,Closer,Stage,Amount,Currency,Payment ID,Created At,Paid At\n';
 
     // CSV rows
     const rows = deals.map((deal) => {
@@ -231,7 +231,6 @@ export class DealsService {
 
       return [
         deal.id,
-        deal.name || '',
         leadName,
         leadEmail,
         closerName,
