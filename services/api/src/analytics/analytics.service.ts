@@ -52,7 +52,7 @@ export class AnalyticsService {
     const closers = await this.prisma.user.findMany({
       where: { workspaceId, role: 'CLOSER' },
       include: {
-        closedDeals: {
+        deals: {
           where: { stage: 'PAID' },
         },
       },
@@ -61,8 +61,8 @@ export class AnalyticsService {
     return closers.map((closer) => ({
       id: closer.id,
       name: `${closer.firstName} ${closer.lastName}`,
-      dealsCount: closer.closedDeals.length,
-      revenue: closer.closedDeals.reduce((sum, deal) => sum + Number(deal.amount || 0), 0),
+      dealsCount: closer.deals.length,
+      revenue: closer.deals.reduce((sum, deal) => sum + Number(deal.amount || 0), 0),
     }));
   }
 }

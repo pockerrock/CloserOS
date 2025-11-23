@@ -126,7 +126,7 @@ export class BookingsScheduler {
     if (booking.lead?.phone) {
       const message = `Reminder: You have a call with ${closerName} in ${hoursUntil} hours at ${new Date(booking.scheduledAt).toLocaleTimeString()}.${meetingUrl ? ` Join: ${meetingUrl}` : ''}`;
 
-      await this.smsService.sendSMS({
+      await this.smsService.sendSms({
         to: booking.lead.phone,
         message,
       });

@@ -40,12 +40,12 @@ export class AiService {
 
     try {
       const formData = new FormData();
-      const blob = new Blob([fileBuffer], { type: fileType });
+      const blob = new Blob([new Uint8Array(fileBuffer)], { type: fileType });
       formData.append('file', blob, fileName);
       formData.append('workspace_id', workspaceId);
 
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/documents/process`, formData, {
+        this.httpService.post<any>(`${this.aiServiceUrl}/documents/process`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -72,7 +72,7 @@ export class AiService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/transcribe`, {
+        this.httpService.post<any>(`${this.aiServiceUrl}/transcribe`, {
           audio_url: audioUrl,
           language,
         }),
@@ -105,7 +105,7 @@ export class AiService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/summarize/call`, {
+        this.httpService.post<any>(`${this.aiServiceUrl}/summarize/call`, {
           call_id: callId,
           transcript,
         }),
@@ -136,7 +136,7 @@ export class AiService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/rag/query`, {
+        this.httpService.post<any>(`${this.aiServiceUrl}/rag/query`, {
           query,
           workspace_id: workspaceId,
           top_k: topK,
@@ -157,7 +157,7 @@ export class AiService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/embeddings`, {
+        this.httpService.post<any>(`${this.aiServiceUrl}/embeddings`, {
           text,
           model,
         }),

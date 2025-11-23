@@ -106,6 +106,6 @@ export class DocumentsService {
   }
 
   async queryDocuments(workspaceId: string, query: string, topK: number = 5) {
-    return this.aiService.queryDocuments(query, workspaceId, topK);
+    return this.aiService.queryKnowledgeBase(query, workspaceId, topK);
   }
 }
