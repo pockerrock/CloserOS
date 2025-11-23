@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { RegisterDto, RegisterTeamMemberDto } from './dto/register.dto';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/prisma/prisma.types';
 
 @Injectable()
 export class AuthService {

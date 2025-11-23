@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { DealsService } from './deals.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { DealStage } from '@prisma/client';
+import { DealStage } from '../common/prisma/prisma.types';
 
 @ApiTags('deals')
 @ApiBearerAuth()

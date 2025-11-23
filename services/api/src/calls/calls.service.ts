@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { DailyService } from '../common/daily/daily.service';
-import { CallStatus } from '@prisma/client';
+import { CallStatus } from '../common/prisma/prisma.types';
 
 @Injectable()
 export class CallsService {

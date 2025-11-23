@@ -4,7 +4,7 @@ import { Queue } from 'bull';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { StripeService } from '../common/stripe/stripe.service';
 import { EmailService } from '../common/notifications/email.service';
-import { DealStage } from '@prisma/client';
+import { DealStage } from '../common/prisma/prisma.types';
 
 @Injectable()
 export class WebhooksService {
