@@ -2,7 +2,7 @@
 
 **AI-powered OS for high-ticket closers & setters**
 
-Version: 1.3 — 2025-11-23
+Version: 2.0 — 2025-11-23
 
 ## 🎯 Overview
 
@@ -151,6 +151,57 @@ CloserOS combines scheduling, native calling, AI whisper coaching (trained on co
 - ✅ **Enhanced Error Responses**: Detailed validation messages
 - ✅ **Password Security**: Minimum 8 characters enforced
 - ✅ **Token Validation**: Secure booking token verification
+
+## ✨ What's New in Part 5
+
+### 🤖 AI Service Implementation
+
+#### Python AI Service
+- ✅ **FastAPI Service**: Complete AI microservice with embeddings, STT, RAG, summarization
+- ✅ **OpenAI Integration**: Text embeddings using text-embedding-3-small
+- ✅ **Deepgram STT**: Speech-to-text with speaker diarization
+- ✅ **Claude/GPT Summarization**: Call summaries with key points, objections, sentiment
+- ✅ **pgvector RAG**: Document retrieval and question answering
+
+#### Document Processing
+- ✅ **Text Extraction**: PDF, DOCX, TXT file support
+- ✅ **Text Chunking**: Smart chunking with overlap for better embeddings
+- ✅ **Batch Embeddings**: Efficient batch processing of document chunks
+- ✅ **Vector Storage**: pgvector integration for semantic search
+
+#### Call Intelligence
+- ✅ **Transcription Service**: Deepgram integration for high-quality transcripts
+- ✅ **Call Summarization**: Automated summaries with AI
+- ✅ **Insights Extraction**: Topics, questions, pain points, buying signals
+- ✅ **Sentiment Analysis**: Positive, neutral, negative classification
+
+#### Knowledge Base (RAG)
+- ✅ **Semantic Search**: Vector similarity search with pgvector
+- ✅ **Context Retrieval**: Retrieve relevant document chunks
+- ✅ **Answer Generation**: LLM-powered answers with sources
+- ✅ **Confidence Scoring**: Relevance-based confidence metrics
+
+#### AI Service Client (NestJS)
+- ✅ **AiService Module**: Global module for AI operations
+- ✅ **HTTP Client**: Axios-based client to Python AI service
+- ✅ **Mock Mode**: Development mode without API keys
+- ✅ **Error Handling**: Comprehensive error logging and handling
+
+### 📊 Analytics & Reporting
+
+#### Analytics Endpoints
+- ✅ **Dashboard Metrics**: Leads, deals, calls, revenue by period (7d, 30d, 90d)
+- ✅ **Funnel Analytics**: Deal counts and values by stage
+- ✅ **Team Performance**: Individual closer metrics and leaderboard
+- ✅ **API Endpoints**: `/api/analytics/dashboard`, `/api/analytics/funnel`, `/api/analytics/team-performance`
+
+### 🌐 Landing Page
+
+#### Marketing Site (`/`)
+- ✅ **Hero Section**: Value proposition and CTAs
+- ✅ **Features Showcase**: 6 key features with icons
+- ✅ **Call-to-Action**: Sign up and login buttons
+- ✅ **Professional Design**: Gradient backgrounds and responsive layout
 
 ## 🏗️ Architecture
 

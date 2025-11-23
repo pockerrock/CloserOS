@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
+import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
@@ -12,10 +13,12 @@ import { DealsModule } from './deals/deals.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { DocumentsModule } from './documents/documents.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { S3Module } from './common/s3/s3.module';
-import { StripeModule } from './common/stripe/stripe.module';
+import { StripeModule} from './common/stripe/stripe.module';
 import { DailyModule } from './common/daily/daily.module';
+import { AiModule } from './common/ai/ai.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -38,10 +41,12 @@ import { AppService } from './app.service';
         port: parseInt(process.env.REDIS_URL?.split(':')[2] || '6379'),
       },
     }),
+    HttpModule,
     PrismaModule,
     S3Module,
     StripeModule,
     DailyModule,
+    AiModule,
     AuthModule,
     UsersModule,
     WorkspacesModule,
@@ -51,6 +56,7 @@ import { AppService } from './app.service';
     BookingsModule,
     DocumentsModule,
     WebhooksModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
